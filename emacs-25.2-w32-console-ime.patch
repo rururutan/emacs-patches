@@ -1,0 +1,79 @@
+--- src/w32inevt.c.org	Thu Apr 02 16:23:06 2015
++++ src/w32inevt.c	Mon Jul 03 22:55:42 2017
+@@ -75,7 +75,7 @@
+ }
+ 
+ /* Set by w32_console_toggle_lock_key.  */
+-int faked_key;
++int faked_key = -1;
+ 
+ static int
+ fill_queue (BOOL block)
+@@ -167,7 +167,7 @@
+   /* Ignore keystrokes we fake ourself; see below.  */
+   if (faked_key == event->wVirtualKeyCode)
+     {
+-      faked_key = 0;
++      faked_key = -1;
+       return 0;
+     }
+ 
+@@ -314,27 +314,37 @@
+ 	    w32_kbd_patch_key (event, -1);
+ 	}
+ 
+-      if (event->uChar.AsciiChar == 0)
++      if (event->uChar.UnicodeChar == 0)
+ 	{
+ 	  emacs_ev->kind = NO_EVENT;
+ 	  return 0;
+ 	}
+-      else if (event->uChar.AsciiChar > 0)
++      else if (w32_console_unicode_input)
+ 	{
+-	  /* Pure ASCII characters < 128.  */
+-	  emacs_ev->kind = ASCII_KEYSTROKE_EVENT;
+-	  emacs_ev->code = event->uChar.AsciiChar;
+-	}
+-      else if (event->uChar.UnicodeChar > 0
+-	       && w32_console_unicode_input)
+-	{
+-	  /* Unicode codepoint; only valid if we are using Unicode
+-	     console input mode.  */
+-	  emacs_ev->kind = MULTIBYTE_CHAR_KEYSTROKE_EVENT;
+-	  emacs_ev->code = event->uChar.UnicodeChar;
++        if (event->uChar.UnicodeChar < 128)
++	  {
++	    /* Pure ASCII characters < 128.  */
++	    emacs_ev->kind = ASCII_KEYSTROKE_EVENT;
++	    emacs_ev->code = event->uChar.UnicodeChar;
++	  }
++        else
++	  {
++	    /* Unicode codepoint; only valid if we are using Unicode
++	       console input mode.  */
++	    emacs_ev->kind = MULTIBYTE_CHAR_KEYSTROKE_EVENT;
++	    emacs_ev->code = event->uChar.UnicodeChar;
++	  }
+ 	}
+       else
+ 	{
++        if (event->uChar.AsciiChar < 128)
++	  {
++	    /* Pure ASCII characters < 128.  */
++	    emacs_ev->kind = ASCII_KEYSTROKE_EVENT;
++	    emacs_ev->code = event->uChar.AsciiChar;
++	  }
++        else
++	  {
+ 	  /* Fallback handling of non-ASCII characters for non-Unicode
+ 	     versions of Windows, and for non-Unicode input on NT
+ 	     family of Windows.  Only characters in the current
+@@ -379,6 +389,7 @@
+ 	    }
+ 	  emacs_ev->kind = MULTIBYTE_CHAR_KEYSTROKE_EVENT;
+ 	  emacs_ev->code = code;
++	  }
+ 	}
+     }
+   else

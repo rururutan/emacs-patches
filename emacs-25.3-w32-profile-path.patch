@@ -1,0 +1,15 @@
+--- src\w32.c.org	Sat Apr 15 00:02:47 2017
++++ src\w32.c	Thu Oct 19 22:18:24 2017
+@@ -2661,10 +2661,10 @@
+ 
+ 	if (get_folder_path != NULL)
+ 	  {
+-	    profile_result = get_folder_path (NULL, CSIDL_APPDATA, NULL,
++	    profile_result = get_folder_path (NULL, CSIDL_PROFILE, NULL,
+ 					      0, default_home);
+ 
+-	    /* If we can't get the appdata dir, revert to old behavior.	 */
++	    /* If we can't get the profile dir, revert to old behavior.	 */
+ 	    if (profile_result == S_OK)
+ 	      {
+ 		env_vars[0].def_value = default_home;
