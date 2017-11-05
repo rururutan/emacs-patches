@@ -1,0 +1,11 @@
+--- src/w32console.c.org	2017-04-15 00:02:47.000000000 +0900
++++ src/w32console.c	2017-11-05 11:05:56.080057900 +0900
+@@ -483,7 +483,7 @@
+ 
+   SetConsoleActiveScreenBuffer (cur_screen);
+ 
+-  SetConsoleMode (keyboard_handle, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
++  SetConsoleMode (keyboard_handle, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS);
+ 
+   /* Initialize input mode: interrupt_input off, no flow control, allow
+      8 bit character input, standard quit char.  */
